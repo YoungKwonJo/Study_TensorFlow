@@ -32,7 +32,6 @@ def extract_images(filename):
     cols = _read32(bytestream)
     buf = bytestream.read( (rows * cols * num_images)[0])
     data = numpy.frombuffer(buf, dtype=numpy.uint8)
-    #print(type(num_images), type(rows), type(cols))
     data = data.reshape(num_images[0], rows[0], cols[0], 1)
     return data
 def dense_to_one_hot(labels_dense, num_classes=10):
