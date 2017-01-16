@@ -42,8 +42,8 @@ trX, trY, teX, teY = mnist.train.images, mnist.train.labels, mnist.test.images, 
 trX = trX.reshape(-1, 28, 28, 1)  # 28x28x1 input img
 teX = teX.reshape(-1, 28, 28, 1)  # 28x28x1 input img
 
-X = tf.placeholder("float", [None, 28, 28, 1])
-Y = tf.placeholder("float", [None, 10])
+X = tf.placeholder("float", [None, 28, 28, 1], name='x-input')
+Y = tf.placeholder("float", [None, 10], name='y-input')
 
 w2 = init_weights([3, 3, 32, 64],"w2")     # 3x3x32 conv, 64 outputs
 w = init_weights([3, 3, 1, 32],"w")       # 3x3x1 conv, 32 outputs
@@ -51,8 +51,8 @@ w3 = init_weights([3, 3, 64, 128],"w3")    # 3x3x32 conv, 128 outputs
 w4 = init_weights([128 * 4 * 4, 625],"w4") # 128 filters * 4*4 image
 w_o = init_weights([625, 10],"w_o")         # FC 625 inputs, 10 outputs (labels)
 
-p_keep_conv = tf.placeholder("float")
-p_keep_hidden = tf.placeholder("float")
+p_keep_conv = tf.placeholder("float", None,"p_keep_conv")
+p_keep_hidden = tf.placeholder("float", None,"p_keep_hidden")
 py_x = model(X, w, w2, w3, w4, w_o, p_keep_conv, p_keep_hidden)
 
 with tf.name_scope('cost') as scope:
@@ -64,6 +64,9 @@ with tf.name_scope('train') as scope:
 predict_op = tf.argmax(py_x, 1)
 
 w_o_hist = tf.histogram_summary("w_o", w_o)
+y_hist = tf.histogram_summary("y-input", Y)
+p_keep_conv_hist = tf.histogram_summary("p_keep_conv", p_keep_conv)
+p_keep_hidden_hist = tf.histogram_summary("p_keep_hidden", p_keep_hidden)
 
 
 # Launch the graph in a session
@@ -83,7 +86,7 @@ with tf.Session() as sess:
             if iii % 100 == 0:
                 summary = sess.run(merged, feed_dict={X: trX[start:end], Y: trY[start:end],
                                           p_keep_conv: 0.8, p_keep_hidden: 0.5})
-                writer.add_summary(summary, iii)
+                writer.add_summary(summary, iii/100)
             #print sess.run(cost, feed_dict={X: trX[start:end], Y: trY[start:end],
             #                                p_keep_conv: 0.8, p_keep_hidden: 0.5})
             iii+=1
